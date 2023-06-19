@@ -15,7 +15,7 @@ def extract(o, h, key, value):
 
 if __name__ == "__main__":
 
-    # Reads topic (/joint_states by default) from ROS1 bag file. Saves position, velocity, effort data to CSV files.
+    # Reads topic (/franka_state_controller/franka_states) from ROS1 bag file. Saves position, velocity, effort data to CSV files.
 
     # Example usage:
     #  python ros1bag2csv-ext.py -i d:/backup/2023-06-16/ros1-dumps/move_x_plus_minus.bag -o target/move_x.csv
@@ -56,6 +56,7 @@ if __name__ == "__main__":
                 extract(o, h, "tau_J", list(msg.tau_J))
                 extract(o, h, "dtau_J", list(msg.dtau_J))
                 extract(o, h, "O_T_EE", list(msg.O_T_EE))  #  Measured end effector pose in base frame.
+                # extract(o, h, "O_T_EE_c", list(msg.O_T_EE_c))  #  Last commanded end effector pose of motion generation in base frame.
                 extract(o, h, "EE_T_K", list(msg.EE_T_K))  #  Stiffness frame pose in end effector frame.
                 extract(o, h, "O_F_ext_hat_K", list(msg.O_F_ext_hat_K))  # Estimated external wrench (force, torque) acting on stiffness frame, expressed relative to the base frame.
                 extract(o, h, "K_F_ext_hat_K", list(msg.K_F_ext_hat_K))  # Estimated external wrench (force, torque) acting on stiffness frame, expressed relative to the stiffness frame.
