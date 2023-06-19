@@ -63,6 +63,7 @@ if __name__ == "__main__":
 
     n_groups = len(fields)
     fig, axs = plt.subplots(ncols=1, nrows=n_groups, sharex=True, figsize=(15,5*n_groups))
+    fig.suptitle(input_path + f" [{';'.join(fields)}]", fontsize=12)
     if n_groups == 1:
         axs = [axs]
     plt.xlabel('Frame')
