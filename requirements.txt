@@ -4,3 +4,4 @@ pandas
 numpy
 meshcat
 meshcat-shapes
+keyboard
