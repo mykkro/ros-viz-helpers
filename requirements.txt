@@ -5,3 +5,4 @@ numpy
 meshcat
 meshcat-shapes
 keyboard
+matplotlib
