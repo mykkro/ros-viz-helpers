@@ -5,7 +5,7 @@
 for FILE in move_x move_y move_z rot_x rot_y rot_z
 do
     python display-timeseries.py -i target/${FILE}_comp.csv -f 'q.*' -f 'dq.*' -f 'dq_filtered.*' -f 'tau_J.*' -o target/${FILE}.q.png 
-    python display-timeseries.py -i target/${FILE}_comp.csv -f 'ee_pos.*' -f 'ee_rot_xyzw.*' -o target/${FILE}.ee.png 
+    python display-timeseries.py -i target/${FILE}_comp.csv -f 'ee_pos.*' -f 'ee_rot_xyzw.*' -f 'ee_twist.*' -o target/${FILE}.ee.png 
     python display-timeseries.py -i target/${FILE}_comp.csv -f 'tau_J.*' -f 'dtau_J.*' -f 'tau_ext_hat_filtered.*' -o target/${FILE}.tau.png 
 
     python display-timeseries.py -i target/${FILE}_comp.csv -f 'q.*' -f 'position.0,position.1,position.2,position.3,position.4,position.5,position.6' -o target/${FILE}.pos.png 

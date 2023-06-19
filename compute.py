@@ -114,6 +114,7 @@ if __name__ == "__main__":
         add_new_column(newdf, "dq_filtered", 7)
         add_new_column(newdf, "ee_pos", 3)
         add_new_column(newdf, "ee_rot_xyzw", 4)
+        add_new_column(newdf, "ee_twist", 6)
 
         # add synthetic columns
         print("TRAJECTORY:")
@@ -143,7 +144,22 @@ if __name__ == "__main__":
                 q[k] = q_[k]
 
             pin.forwardKinematics(model, data, q)
+            pin.computeJointJacobians(model, data, q)
             pin.updateFramePlacements(model, data)
+            # https://github.com/stack-of-tasks/pinocchio/issues/1140
+            frame_J = pin.getFrameJacobian(model,data,ee_indx,pin.ReferenceFrame.LOCAL_WORLD_ALIGNED)
+            local_to_world_transform = pin.SE3.Identity()
+            local_to_world_transform.rotation = data.oMf[ee_indx].rotation
+            frame = model.frames[ee_indx]
+            frame_placement = frame.placement
+            parent_joint = frame.parent
+            frame_v = local_to_world_transform.act(frame_placement.actInv(data.v[parent_joint]))
+            J_dot_v = pin.Motion(frame_J.dot(dq_filtered_)) # pin.Motion
+
+            #print("Frame velocity:\n",frame_v)
+            print("J_dot_v:\n",J_dot_v)
+            ee_twist = np.hstack([J_dot_v.linear, J_dot_v.angular])
+            print("ee_twist:", ee_twist)
 
             oMf = data.oMf[ee_indx]
             t_matrix = tf.translation_matrix(oMf.translation)
@@ -161,6 +177,7 @@ if __name__ == "__main__":
             set_value(newdf, i, "ee_pos", ee_pos)
             ee_rot_xyzw = [quat.x, quat.y, quat.z, quat.w]
             set_value(newdf, i, "ee_rot_xyzw", ee_rot_xyzw)
+            set_value(newdf, i, "ee_twist", ee_twist)
             set_value(newdf, i, "dq_filtered", dq_filtered_)
             set_value(newdf, i, "eff_delta", eff_delta)
 
