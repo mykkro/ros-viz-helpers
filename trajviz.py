@@ -193,8 +193,6 @@ if __name__ == "__main__":
         last_trace_ndx = None
         render_time = 0
 
-        print(f"Outer Loop {last_trace_ndx}")
-
         while running and (trace_ndx < len(trace_list)):
 
             # Find row that will be displayed    
@@ -216,16 +214,25 @@ if __name__ == "__main__":
                 # display it            
                 # Find the index of this trace
                 print(f"Displaying Trace {last_trace_ndx}")
-                q2 = trace
-
+                timestamp_ns = None
                 # Change q vector to this trace
+                qq = []
+                q2 = trace
                 for fname, fvalue in zip(names_list, q2):
                     if fname != "time_ns":
                         q[joint_indices_dict[fname]] = fvalue
+                        qq.append(fvalue)
+                    else:
+                        timestamp_ns = int(fvalue)
+
+                print("  Timestamp:", timestamp_ns)
+                print("  Position:", qq)
 
                 # Update model using pinocchio forward kinematics
                 pin.forwardKinematics(model, viz.data, q)
                 pin.updateFramePlacements(model, viz.data)
+
+                # compute other data by Pinocchio...
                 
                 # Update Trace Label
                 meshcat_shapes.textarea(viz.viewer["world"]["label"], f"Trace{last_trace_ndx}", font_size=20)
