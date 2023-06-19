@@ -1,0 +1,6 @@
+rosbags
+pyyaml
+pandas
+numpy
+meshcat
+meshcat-shapes

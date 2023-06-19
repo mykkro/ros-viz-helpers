@@ -1,0 +1,10 @@
+.idea/
+.vscode/
+*.log
+__pycache__/
+build/
+dist/
+target/
+kommons.egg-info/
+.eggs/
+.pytest_cache/
