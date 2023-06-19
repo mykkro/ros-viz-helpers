@@ -13,6 +13,7 @@ import meshcat.geometry as g
 import meshcat.transformations as tf
 import meshcat_shapes
 import tempfile
+from numpy.linalg import pinv
 
 
 from commandr import Commandr
@@ -123,9 +124,15 @@ if __name__ == "__main__":
         dq_filtered_ = np.array([0,0,0,0,0,0,0])
         alpha_dq_filter_ = 0.50 # 0.99
 
+        last_time_ns = None
+        dt = 0
         for i, row in df.iterrows():
             time_ns = row["time_ns"]
-            print(time_ns)
+            if last_time_ns is not None:
+                # difference between two consecutive frames, in seconds (it should be ~ 30ms)
+                dt = (time_ns - last_time_ns)/1e9
+            last_time_ns = time_ns
+            print(time_ns, dt)
             d = extract_vectors(df.columns, row, ["q", "dq", "tau_J", "O_T_EE", "effort", "tau_J"])
             for key, val in d.items():
                 print("   ", key, val)
@@ -151,15 +158,19 @@ if __name__ == "__main__":
             local_to_world_transform = pin.SE3.Identity()
             local_to_world_transform.rotation = data.oMf[ee_indx].rotation
             frame = model.frames[ee_indx]
-            frame_placement = frame.placement
-            parent_joint = frame.parent
-            frame_v = local_to_world_transform.act(frame_placement.actInv(data.v[parent_joint]))
+            # frame_placement = frame.placement
+            # parent_joint = frame.parent
+            # frame_v = local_to_world_transform.act(frame_placement.actInv(data.v[parent_joint]))
             J_dot_v = pin.Motion(frame_J.dot(dq_filtered_)) # pin.Motion
 
-            #print("Frame velocity:\n",frame_v)
-            print("J_dot_v:\n",J_dot_v)
+            # print("Frame velocity:\n",frame_v)
+            # print("J_dot_v:\n",J_dot_v)
             ee_twist = np.hstack([J_dot_v.linear, J_dot_v.angular])
-            print("ee_twist:", ee_twist)
+            print("    ee_twist:", ee_twist)
+
+            J_pinv = pinv(frame_J)
+            print("    jacobian:", frame_J.shape) # (6,7)
+            print("    pseudoinverse:", J_pinv.shape) # (7,6)
 
             oMf = data.oMf[ee_indx]
             t_matrix = tf.translation_matrix(oMf.translation)
@@ -168,7 +179,7 @@ if __name__ == "__main__":
             # print((t_matrix - O_T_EE2))
             otee_error = np.abs(t_matrix - O_T_EE2).sum()
 
-            # conputye EE position and quaternion
+            # conpute EE position and quaternion
             ee_pos = oMf.translation
 
             quat = pin.Quaternion(r_matrix)
@@ -181,7 +192,7 @@ if __name__ == "__main__":
             set_value(newdf, i, "dq_filtered", dq_filtered_)
             set_value(newdf, i, "eff_delta", eff_delta)
 
-            print("  O_T_EE error:", otee_error)
+            print("    O_T_EE error:", otee_error)
             print()
 
         newdf.to_csv(output_path, index=False)
