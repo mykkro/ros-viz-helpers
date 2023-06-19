@@ -112,6 +112,7 @@ if __name__ == "__main__":
                 print("   ", key, val)
 
             q2 = d["q"]
+            O_T_EE2 = np.array(d["O_T_EE"]).reshape(4,4,order='F')
 
             # update configuration
             for i in range(7):
@@ -124,7 +125,9 @@ if __name__ == "__main__":
             t_matrix = tf.translation_matrix(oMf.translation)
             r_matrix = oMf.rotation
             t_matrix[0:3, 0:3] = r_matrix    
-            print(t_matrix)        
+            # print((t_matrix - O_T_EE2))
+            otee_error = np.abs(t_matrix - O_T_EE2).sum()
+            print("  O_T_EE error:", otee_error)
             print()
 
         exit()
