@@ -3,6 +3,7 @@ from pathlib import Path
 from rosbags.highlevel import AnyReader
 import yaml
 import pandas as pd
+import numpy as np
 from commandr import Commandr
 
 
@@ -18,39 +19,40 @@ if __name__ == "__main__":
     # Reads topic (/franka_state_controller/franka_states) from ROS1 bag file. Saves position, velocity, effort data to CSV files.
 
     # Example usage:
-    #  python ros1bag2csv-ext.py -i d:/backup/2023-06-16/ros1-dumps/move_x_plus_minus.bag -o target/move_x.csv
+    #  python ros1bag2csv-fuse.py -i d:/backup/2023-06-16/ros1-dumps/move_x_plus_minus.bag -o target/move_x.csv
 
 
     cmdr = Commandr("ros1bag2csv", title="ROS1 bag to CSV")
     cmdr.add_argument("input", "-i", type="str", required=True)
     cmdr.add_argument("output", "-o", type="str", required=True)
-    cmdr.add_argument("topic", "-t|--topic", default="/franka_state_controller/franka_states")
  
     args, configs = cmdr.parse()
 
     input_path = args["input"]
     output_path = args["output"]
-    topic = args["topic"]
 
     print(f"Input path:     {input_path}")
     print(f"Output path:    {output_path}")
-    print(f"Topic:          {topic}")
+
+    main_topic = "/franka_state_controller/franka_states"
 
     file = Path(input_path)
     dataset_name = file.name
-    tbl = []
+    tables = {}
+    headers = {}
     header = None
     with AnyReader([file]) as reader:
         for connection, timestamp, rawdata in reader.messages(connections=reader.connections):
             topic_read = connection.topic
-            if topic_read == topic:
-                msg = reader.deserialize(rawdata, connection.msgtype)
+            msg = reader.deserialize(rawdata, connection.msgtype)
+            time_stamp = msg.header.stamp
+            time_ns = int(time_stamp.sec * 1e9 + time_stamp.nanosec)
+            if topic_read not in tables:
+                tables[topic_read] = []
 
-                time_stamp = msg.header.stamp
-                time_ns = int(time_stamp.sec * 1e9 + time_stamp.nanosec)
-
-                o = dict(time_ns=time_ns)
-                h = ["time_ns"]
+            o = dict(time_ns=time_ns)
+            h = ["time_ns"]
+            if topic_read == main_topic:
                 extract(o, h, "q", list(msg.q))
                 extract(o, h, "dq", list(msg.dq))
                 extract(o, h, "tau_J", list(msg.tau_J))
@@ -63,9 +65,31 @@ if __name__ == "__main__":
                 extract(o, h, "K_F_ext_hat_K", list(msg.K_F_ext_hat_K))  # Estimated external wrench (force, torque) acting on stiffness frame, expressed relative to the stiffness frame.
                 extract(o, h, "tau_ext_hat_filtered", list(msg.tau_ext_hat_filtered))  # External torque, filtered
 
-                header = h
-                tbl.append(o)
+            else:
+                extract(o, h, "name", list(msg.name))
+                extract(o, h, "position", list(msg.position))
+                extract(o, h, "velocity", list(msg.velocity))
+                extract(o, h, "effort", list(msg.effort))
+
+            headers[topic_read] = h
+            tables[topic_read].append((time_ns, o))
+
+    secondary_index = np.array([a[0] for a in tables["/joint_states"]])
+
+    last_time_ns = None
+    tbl = []
+    for time_ns,data in tables[main_topic]:
+        # print(time_ns, data)
+        if last_time_ns is not None:
+            indices = np.where(np.logical_and(secondary_index>= last_time_ns, secondary_index<= time_ns))
+            if len(indices) > 0:
+                secondary_data = tables["/joint_states"][indices[0][0]][1]
+                data = { **secondary_data, **data }
+                tbl.append(data)
+        last_time_ns = time_ns
+    header = headers[main_topic] + headers["/joint_states"][1:]
 
     df = pd.DataFrame(tbl)
     df.to_csv(output_path, columns=header, index=False)
+
 

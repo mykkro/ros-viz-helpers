@@ -25,7 +25,7 @@ def extract_vectors(columns, row, names):
         for c in columns:
             if c.split(".")[0] == name:
                 eligible_names.append(c)
-        values = [row[en] for en in eligible_names]
+        values = np.array([row[en] for en in eligible_names])
         out[name] = values
     return out
 
@@ -111,6 +111,7 @@ if __name__ == "__main__":
         df = pd.read_csv(input_path)
         newdf = df.copy()
 
+        add_new_column(newdf, "dq_filtered", 7)
         add_new_column(newdf, "ee_pos", 3)
         add_new_column(newdf, "ee_rot_xyzw", 4)
 
@@ -118,19 +119,28 @@ if __name__ == "__main__":
         print("TRAJECTORY:")
         print(f"No. of frames: {len(df)}")
         
+        dq_filtered_ = np.array([0,0,0,0,0,0,0])
+        alpha_dq_filter_ = 0.50 # 0.99
+
         for i, row in df.iterrows():
             time_ns = row["time_ns"]
             print(time_ns)
-            d = extract_vectors(df.columns, row, ["q", "dq", "tau_J", "O_T_EE"])
+            d = extract_vectors(df.columns, row, ["q", "dq", "tau_J", "O_T_EE", "effort", "tau_J"])
             for key, val in d.items():
                 print("   ", key, val)
 
-            q2 = d["q"]
+            q_ = d["q"]
+            dq_= d["dq"]
+            dq_filtered_ = (1 - alpha_dq_filter_) * dq_filtered_ + alpha_dq_filter_ * dq_
+            eff_ = d["effort"][:7]
+            tau_J = d["tau_J"]
+            eff_delta = eff_ - tau_J
+
             O_T_EE2 = np.array(d["O_T_EE"]).reshape(4,4,order='F')
 
             # update configuration
             for k in range(7):
-                q[k] = q2[k]
+                q[k] = q_[k]
 
             pin.forwardKinematics(model, data, q)
             pin.updateFramePlacements(model, data)
@@ -151,6 +161,8 @@ if __name__ == "__main__":
             set_value(newdf, i, "ee_pos", ee_pos)
             ee_rot_xyzw = [quat.x, quat.y, quat.z, quat.w]
             set_value(newdf, i, "ee_rot_xyzw", ee_rot_xyzw)
+            set_value(newdf, i, "dq_filtered", dq_filtered_)
+            set_value(newdf, i, "eff_delta", eff_delta)
 
             print("  O_T_EE error:", otee_error)
             print()
