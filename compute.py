@@ -29,6 +29,14 @@ def extract_vectors(columns, row, names):
         out[name] = values
     return out
 
+def add_new_column(df, name, count):
+    for i in range(count):
+        df[f"{name}.{i}"] = 0.0
+
+def set_value(df, i, name, value):
+    for j, val in enumerate(value):
+        df.at[i, f"{name}.{j}"] = val
+
 
 
 if __name__ == "__main__":
@@ -101,6 +109,12 @@ if __name__ == "__main__":
 
     if input_path is not None:
         df = pd.read_csv(input_path)
+        newdf = df.copy()
+
+        add_new_column(newdf, "ee_pos", 3)
+        add_new_column(newdf, "ee_rot_xyzw", 4)
+
+        # add synthetic columns
         print("TRAJECTORY:")
         print(f"No. of frames: {len(df)}")
         
@@ -115,8 +129,8 @@ if __name__ == "__main__":
             O_T_EE2 = np.array(d["O_T_EE"]).reshape(4,4,order='F')
 
             # update configuration
-            for i in range(7):
-                q[i] = q2[i]
+            for k in range(7):
+                q[k] = q2[k]
 
             pin.forwardKinematics(model, data, q)
             pin.updateFramePlacements(model, data)
@@ -127,8 +141,21 @@ if __name__ == "__main__":
             t_matrix[0:3, 0:3] = r_matrix    
             # print((t_matrix - O_T_EE2))
             otee_error = np.abs(t_matrix - O_T_EE2).sum()
+
+            # conputye EE position and quaternion
+            ee_pos = oMf.translation
+
+            quat = pin.Quaternion(r_matrix)
+            angle = pin.AngleAxis(r_matrix).angle
+            axis =  pin.AngleAxis(r_matrix).axis            
+            set_value(newdf, i, "ee_pos", ee_pos)
+            ee_rot_xyzw = [quat.x, quat.y, quat.z, quat.w]
+            set_value(newdf, i, "ee_rot_xyzw", ee_rot_xyzw)
+
             print("  O_T_EE error:", otee_error)
             print()
+
+        newdf.to_csv(output_path, index=False)
 
         exit()
 

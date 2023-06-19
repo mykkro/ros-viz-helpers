@@ -29,7 +29,7 @@ if __name__ == "__main__":
     #  python display-timeseries.py -i target/move_x.csv -f 'q.*' -f 'dq.*' -f 'tau_J.*'
     #  python display-timeseries.py -i target/move_x.csv -f 'O_T_EE.12,O_T_EE.13,O_T_EE.14' 
     #  python display-timeseries.py -i target/move_x.csv -f 'q.*' -f 'dq.*' -f 'tau_J.*' --from 100 --to 300 -o target/move_x.q.png
-    #  python display-timeseries.py -i target/move_x.csv -f 'O_T_EE.12,O_T_EE.13,O_T_EE.14' -o target/move_x.O_T_EE.png --from 100 --to 300
+    #  python display-timeseries.py -i target/move_x.csv -f 'ee_pos.*' -f 'ee_rot_xyzw.*' -o target/move_x.ee.png --from 100 --to 300 --plot
 
 
 
