@@ -21,13 +21,13 @@ from commandr import Commandr
 
 if __name__ == "__main__":
 
-    # Reads topic (/joint_states by default) from ROS1 bag file. Saves position, velocity, effort data to CSV files.
+    # Animates Panda robot based on joint states read from CSV file.
 
     # Example usage:
     #  python trajviz.py -i target/move_y_q.csv -u panda/urdf/panda2_inertias.urdf
 
 
-    cmdr = Commandr("ros1bag2csv", title="ROS1 bag to CSV")
+    cmdr = Commandr("trajviz", title="ROS1 bag to CSV")
     cmdr.add_argument("input", "-i", type="str", required=True)
     cmdr.add_argument("urdf", "-u", type="str", required=True)
     cmdr.add_argument("speed", "-s|--speed", type='float', default=1.0)
