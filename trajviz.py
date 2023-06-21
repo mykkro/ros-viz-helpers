@@ -3,7 +3,9 @@ import time
 import numpy as np
 import pandas as pd
 from pathlib import Path
-import keyboard
+# Pynput
+from pynput import keyboard
+from pynput.keyboard import Key
 # Pinocchio
 import pinocchio as pin
 from pinocchio.visualize import MeshcatVisualizer
@@ -32,6 +34,8 @@ if __name__ == "__main__":
     cmdr.add_argument("urdf", "-u", type="str", required=True)
     cmdr.add_argument("speed", "-s|--speed", type='float', default=1.0)
     cmdr.add_argument("repeat", "-r|--repeat", type='switch')
+    cmdr.add_argument("timecol", "-t|--timecol", type="str", default="time_ns")
+    cmdr.add_argument("poscol", "-p|--poscol", type="str", default="panda_joint1,panda_joint2,panda_joint3,panda_joint4,panda_joint5,panda_joint6,panda_joint7")
 
     args, configs = cmdr.parse()
 
@@ -40,20 +44,17 @@ if __name__ == "__main__":
     default_urdf_path = args["urdf"]
     speed_coefficient = args["speed"]
     repeat = args["repeat"]
+    timecol = args["timecol"]
+    poscol = args["poscol"]
 
     mesh_path = "panda/meshes"
     ros_url_prefix = "package://panda2_description/meshes"
 
-
+    
     # Joint name list
-    names_list = ["time_ns",
-                "panda_joint1", 
-                "panda_joint2",
-                "panda_joint3",
-                "panda_joint4", 
-                "panda_joint5", 
-                "panda_joint6", 
-                "panda_joint7"]
+    pin_names_list = ["panda_joint1", "panda_joint2", "panda_joint3", "panda_joint4", "panda_joint5", "panda_joint6", "panda_joint7"]
+    names_list = poscol.split(",")
+    names_list.insert(0, timecol)
 
     df = pd.read_csv(traces_csv_path)
 
@@ -63,19 +64,46 @@ if __name__ == "__main__":
         trace_configuration = [row[x] for x in names_list]
         trace_list.append(trace_configuration)
 
+    running = True
+    # Pynput callback functions
+    
+    # Callback functions for pynput keyboard on press
+    
+    def on_press(key):
+        global running
+        try:
+            lookup = key.char.lower()
+        except AttributeError:
+            lookup = key
+        if lookup == 'q':
+            running = False
+
+    
+    # Callback functions for pynput keyboard on release
+    def on_release(key):
+        pass
+
+    # Pynput keyboard listener
+    listener = keyboard.Listener(
+    on_press=on_press,
+    on_release=on_release)
+    listener.start()
+
+    
 
     # Paths to urdf
 
     # URDF file (pathlib is a little nicer but not mandatory)
     urdf_file_path = Path(default_urdf_path)
-
+    
     # Define how you replace your string. Adjust it so it fits your file organization
     abs_path_prefix = str(Path(mesh_path).resolve().as_posix())
 
     # https://stackoverflow.com/questions/70837669/how-can-i-parse-package-in-a-urdf-file-path
     # Start with openning a temp dir (context manger makes it easy to handle)
     with tempfile.TemporaryDirectory() as tmpdirname:
-    
+
+        
         # Where your tmpfile will be
         tmp_file_path = Path(tmpdirname)/urdf_file_path.name
 
@@ -119,9 +147,8 @@ if __name__ == "__main__":
 
     q2 = [0.0,-0.7853981633974483,0.0,-2.356194490192345,0.0,1.5707963267948966,0.7853981633974483]
 
-    for fname, fvalue in zip(names_list, q2):
-        if fname != "time_ns":
-            q[joint_indices_dict[fname]] = fvalue
+    for fname, fvalue in zip(pin_names_list, q2):
+        q[joint_indices_dict[fname]] = fvalue
 
     pin.forwardKinematics(model, viz.data, q)
     pin.updateFramePlacements(model, viz.data)
@@ -185,7 +212,7 @@ if __name__ == "__main__":
         viz.viewer["world"]["reference"]["angle"].set_transform(t_matrix_angle)
         viz.viewer["world"]["reference"]["axis"].set_transform(t_matrix_axis)
 
-    running = True
+
 
     while running:
 
@@ -218,12 +245,11 @@ if __name__ == "__main__":
                 # Change q vector to this trace
                 qq = []
                 q2 = trace
-                for fname, fvalue in zip(names_list, q2):
-                    if fname != "time_ns":
-                        q[joint_indices_dict[fname]] = fvalue
-                        qq.append(fvalue)
-                    else:
-                        timestamp_ns = int(fvalue)
+                for fname, fvalue in zip(pin_names_list, q2[1:]):
+                    q[joint_indices_dict[fname]] = fvalue
+                    qq.append(fvalue)
+
+                timestamp_ns = int(q2[0])
 
                 print("  Timestamp:", timestamp_ns)
                 print("  Position:", qq)
@@ -264,10 +290,6 @@ if __name__ == "__main__":
 
                 create_text()
                 viz.display(q)
-
-                if keyboard.is_pressed("q"):
-                    running = False
-                    break
 
                 time.sleep(step)
             render_time += step * speed_coefficient
