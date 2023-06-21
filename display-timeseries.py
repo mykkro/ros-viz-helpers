@@ -30,7 +30,7 @@ if __name__ == "__main__":
     #  python display-timeseries.py -i target/move_x.csv -f 'O_T_EE.12,O_T_EE.13,O_T_EE.14' 
     #  python display-timeseries.py -i target/move_x.csv -f 'q.*' -f 'dq.*' -f 'tau_J.*' --from 100 --to 300 -o target/move_x.q.png
     #  python display-timeseries.py -i target/move_y_comp.csv -f 'ee_pos.*' -f 'ee_rot_xyzw.*' -o target/move_y.ee.png --from 100 --to 500 --plo
-
+    # python display-timeseries.py -i target/EE_FORCE_EXTRACTED.csv -f "position.*" -f "effort.*" -f "calc_force.0,calc_force.1,calc_force.2" --plot
 
 
     cmdr = Commandr("display-timeseries", title="ROS1 bag to CSV")
