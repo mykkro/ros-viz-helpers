@@ -25,7 +25,8 @@ def fieldextract(input_path, output_path, topic, fields, msgpaths):
     if not fields:
         fields = ["name", "position", "velocity", "effort"]
 
-    register_custom_types(msgpaths)
+    if msgpaths != None:
+        register_custom_types(msgpaths)
     
     file = Path(input_path)
     dataset_name = file.name

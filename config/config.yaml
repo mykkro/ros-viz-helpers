@@ -1,0 +1,50 @@
+---
+tasks:
+  - name: "rosbag_topicshow"
+    inputs:
+      input: "dumps/ros1-dumps/move_x_plus_minus.bag" # franka + joint states
+      msgpath:
+    description: "Read ROS bag file and show all topics and their fields."
+
+  - name: "field_extract"
+    inputs:
+      input: "dumps/ros1-dumps/move_x_plus_minus.bag" # franka + joint states
+      output: "target/extracted_fields_x.csv"
+      topic: "/joint_states"
+      timecol:
+      field: 
+        - "position"
+        - "velocity"
+        - "effort"
+      msgpath:
+    description: "Extract selected topics and fields from ROS bag file to CSV"
+
+  - name: "compute_light"
+    inputs:
+      input: "target/extracted_fields_x.csv" # Output of previous task
+      output: "target/computed_fields_x.csv"
+      urdf: "panda/urdf/panda2_inertias.urdf"
+    description: "Calulate End Effector position and rotation from CSV"
+
+  - name: "display_timeseries"
+    inputs:
+      input: "target/computed_fields_x.csv"
+      output: "target/plotted_computed_fields_x.png"
+      field:
+        - "ee_pos"
+        - "ee_rot_xyzw"
+        - "ee_twist"
+      fromframe:
+      toframe:
+      plot:
+    description: "Plots selected fields from CSV onto graphs"
+
+  - name: "trajviz"
+    inputs:
+      input: "target/computed_fields.csv" # Output of field extactor
+      urdf: "panda/urdf/panda2_inertias.urdf"
+      speed: 10
+      repeat: True
+      timecol:
+      poscol:
+    description: "Visualizes trajectory taken from CSV"

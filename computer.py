@@ -3,7 +3,6 @@ import time
 import numpy as np
 import pandas as pd
 from pathlib import Path
-import keyboard
 # Pinocchio
 import pinocchio as pin
 from pinocchio.visualize import MeshcatVisualizer
@@ -107,14 +106,16 @@ def compute(input_path, output_path, default_urdf_path):
         alpha_dq_filter_ = 0.50 # 0.99
 
         last_time_ns = None
-        dt = 0
+        #dt = 0
         for i, row in df.iterrows():
-            time_ns = row["time_ns"]
+            '''
+            #time_ns = row["time_ns"]
             if last_time_ns is not None:
                 # difference between two consecutive frames, in seconds (it should be ~ 30ms)
                 dt = (time_ns - last_time_ns)/1e9
             last_time_ns = time_ns
             print(time_ns, dt)
+            '''
             d = extract_vectors(df.columns, row, ["position", "velocity", "effort"])
             for key, val in d.items():
                 print("   ", key, val)
