@@ -2,6 +2,7 @@ from pathlib import Path
 from rosbags.highlevel import AnyReader
 from rosbags.typesys import get_types_from_msg, register_types
 
+# This file contains utils used in several ros-viz-helpers
 
 def guess_msgtype(path: Path) -> str:
     """Guess message type name from path."""
