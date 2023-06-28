@@ -21,7 +21,7 @@ tasks:
 
   - name: "compute_light"
     inputs:
-      input: "target/extracted_fields_x.csv" # Output of previous task
+      input: "target/extracted_fields_x.csv" # Output of previous task (field extactor)
       output: "target/computed_fields_x.csv"
       urdf: "panda/urdf/panda2_inertias.urdf"
     description: "Calulate End Effector position and rotation from CSV"
@@ -31,20 +31,20 @@ tasks:
       input: "target/computed_fields_x.csv"
       output: "target/plotted_computed_fields_x.png"
       field:
-        - "ee_pos"
-        - "ee_rot_xyzw"
-        - "ee_twist"
-      fromframe:
-      toframe:
+        - "ee_pos.*"
+        - "ee_rot_xyzw.*"
+        - "ee_twist.*"
+      fromframe: 0
+      toframe: -1
       plot:
     description: "Plots selected fields from CSV onto graphs"
 
   - name: "trajviz"
     inputs:
-      input: "target/computed_fields.csv" # Output of field extactor
+      input: "target/computed_fields_x.csv" # Output of field extactor
       urdf: "panda/urdf/panda2_inertias.urdf"
       speed: 10
       repeat: True
-      timecol:
-      poscol:
+      timecol: "time_ns"
+      poscol: "position.0,position.1,position.2,position.3,position.4,position.5,position.6,position.7" #"panda_joint1,panda_joint2,panda_joint3,panda_joint4,panda_joint5,panda_joint6,panda_joint7"
     description: "Visualizes trajectory taken from CSV"

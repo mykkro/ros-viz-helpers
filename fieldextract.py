@@ -40,9 +40,12 @@ def fieldextract(input_path, output_path, topic, fields, msgpaths):
             if topic_read == topic:
                 
                 msg = reader.deserialize(rawdata, connection.msgtype)
+                # Time from /joint_states
+                time_stamp = msg.header.stamp
+                time_ns = int(time_stamp.sec * 1e9 + time_stamp.nanosec)
 
-                o = dict()
-                h = []
+                o = dict(time_ns=time_ns)
+                h = ["time_ns"]
 
                 # Finds specified fields in the bag and extracts data from them
                 for field in fields:

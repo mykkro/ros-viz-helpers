@@ -117,8 +117,8 @@ def compute(input_path, output_path, default_urdf_path):
             print(time_ns, dt)
             '''
             d = extract_vectors(df.columns, row, ["position", "velocity", "effort"])
-            for key, val in d.items():
-                print("   ", key, val)
+            #for key, val in d.items():
+            #    print("   ", key, val)
 
             q_ = d["position"]
             dq_= d["velocity"]
@@ -140,11 +140,11 @@ def compute(input_path, output_path, default_urdf_path):
             J_dot_v = pin.Motion(frame_J.dot(dq_filtered_)) # pin.Motion
 
             ee_twist = np.hstack([J_dot_v.linear, J_dot_v.angular])
-            print("    ee_twist:", ee_twist)
+            #print("    ee_twist:", ee_twist)
 
             J_pinv = pinv(frame_J)
-            print("    jacobian:", frame_J.shape) # (6,7)
-            print("    pseudoinverse:", J_pinv.shape) # (7,6)
+            #print("    jacobian:", frame_J.shape) # (6,7)
+            #print("    pseudoinverse:", J_pinv.shape) # (7,6)
 
             oMf = data.oMf[ee_indx]
             t_matrix = tf.translation_matrix(oMf.translation)

@@ -3,6 +3,8 @@ import sys
 from topicshow import showtopic
 from fieldextract import fieldextract
 from computer import compute
+from timeseries import timeseriesplot
+from trajvizualizer import visualizetrajectory
 
 class HelperLaunch():
     
@@ -42,7 +44,24 @@ class HelperLaunch():
             compute(task_inputs["input"],
                     task_inputs["output"],
                     task_inputs["urdf"])
-
+        
+        if task_name == "display_timeseries":
+            timeseriesplot(task_inputs["input"],
+                           task_inputs["output"],
+                           task_inputs["field"],
+                           task_inputs["fromframe"],
+                           task_inputs["toframe"],
+                           task_inputs["plot"]
+                           )
+        
+        if task_name == "trajviz":
+            visualizetrajectory(task_inputs["input"],
+                                task_inputs["urdf"],
+                                task_inputs["speed"],
+                                task_inputs["repeat"],
+                                task_inputs["timecol"],
+                                task_inputs["poscol"],
+                                )
 
 a = HelperLaunch()
 a.run()

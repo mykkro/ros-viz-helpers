@@ -215,7 +215,7 @@ def visualizetrajectory(traces_csv_path, default_urdf_path, speed_coefficient, r
                 trace = trace_list[last_trace_ndx]
                 # display it            
                 # Find the index of this trace
-                print(f"Displaying Trace {last_trace_ndx}")
+                #print(f"Displaying Trace {last_trace_ndx}")
                 timestamp_ns = None
                 # Change q vector to this trace
                 qq = []
@@ -226,8 +226,8 @@ def visualizetrajectory(traces_csv_path, default_urdf_path, speed_coefficient, r
 
                 timestamp_ns = int(q2[0])
 
-                print("  Timestamp:", timestamp_ns)
-                print("  Position:", qq)
+                #print("  Timestamp:", timestamp_ns)
+                #print("  Position:", qq)
 
                 # Update model using pinocchio forward kinematics
                 pin.forwardKinematics(model, viz.data, q)

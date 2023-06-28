@@ -27,7 +27,7 @@ def timeseriesplot(input_path, output_path, fields, from_frame, to_frame, shall_
     columns = df.columns
 
     df = df[from_frame:to_frame]
-
+    print(f"[{from_frame}:{to_frame}]")
     n_groups = len(fields)
     fig, axs = plt.subplots(ncols=1, nrows=n_groups, sharex=True, figsize=(15,5*n_groups))
     fig.suptitle(input_path + f" [{';'.join(fields)}]", fontsize=12)
