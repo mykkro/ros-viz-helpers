@@ -18,7 +18,7 @@ import tempfile
 
 
 from commandr import Commandr
-from trajvizualizer import visualizetrajectory
+from core_programs.trajvizualizer import visualizetrajectory
 
 # Animates Panda robot based on joint states read from CSV file.
 

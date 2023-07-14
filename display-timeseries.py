@@ -5,7 +5,7 @@ import yaml
 import pandas as pd
 from commandr import Commandr
 import matplotlib.pyplot as plt
-from timeseries import match_pattern, match_columns, timeseriesplot
+from core_programs.timeseries import match_pattern, match_columns, timeseriesplot
 
 # Time Series plotter.
 

@@ -17,7 +17,7 @@ from numpy.linalg import pinv
 
 
 from commandr import Commandr
-from computer import extract_vectors, add_new_column, set_value, compute
+from core_programs.computer import extract_vectors, add_new_column, set_value, compute
 
 # Example usage:
 #  python compute_light.py -i target/move_y.csv -u panda/urdf/panda2_inertias.urdf -o target/move_y_comp.csv

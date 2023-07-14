@@ -1,15 +1,15 @@
 import yaml
 import sys
-from topicshow import showtopic
-from fieldextract import fieldextract
-from computer import compute
-from timeseries import timeseriesplot
-from trajvizualizer import visualizetrajectory
+from core_programs.topicshow import showtopic
+from core_programs.fieldextract import fieldextract
+from core_programs.computer import compute
+from core_programs.timeseries import timeseriesplot
+from core_programs.trajvizualizer import visualizetrajectory
 
 class HelperLaunch():
     
     def __init__(self):
-        self.config_path = "config/config.yaml"
+        self.config_path = "config/configros1.yaml"
         
         try:
             with open(self.config_path, "r", encoding="utf-8") as infile:

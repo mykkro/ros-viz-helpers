@@ -2,8 +2,8 @@ from pathlib import Path
 from rosbags.highlevel import AnyReader
 from commandr import Commandr
 from rosbags.typesys import get_types_from_msg, register_types
-from utils import guess_msgtype, register_custom_types
-from topicshow import showtopic
+from core_programs.utils import guess_msgtype, register_custom_types
+from core_programs.topicshow import showtopic
 
 # Reads ros bag file and prints out all topics and found in it and their respective fields
 

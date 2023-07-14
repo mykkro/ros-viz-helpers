@@ -4,8 +4,8 @@ from rosbags.highlevel import AnyReader
 import yaml
 import pandas as pd
 from commandr import Commandr
-from utils import guess_msgtype, register_custom_types
-from fieldextract import fieldextract, extract 
+from core_programs.utils import guess_msgtype, register_custom_types
+from core_programs.fieldextract import fieldextract, extract 
 
 
 cmdr = Commandr("ros1bag2csv", title="ROS1 bag to CSV")
